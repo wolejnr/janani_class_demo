@@ -56,6 +56,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   double _counter = 0;
+  int numCounter = 0;
+  var isChecked = false;
+  final TextEditingController _num1 = TextEditingController();
+  final TextEditingController _num2 = TextEditingController();
 
   void _incrementCounter() {
     setState(() {
@@ -109,15 +113,32 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
+            
             Image.asset("images/ac_logo.jpg", width: 300),
+            TextField(controller: _num1, decoration: const InputDecoration(
+              hintText: "Please enter a number",
+              labelText: "Number 1",
+              border: OutlineInputBorder()
+            ),),
+            TextField(controller: _num2, decoration: const  InputDecoration(
+              hintText: "Please enter a second number",
+              labelText: "Number 2"
+            ),),
             Text(
-              '$_counter',
+              '$numCounter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            Slider(value: _counter, onChanged: setNewValue, min:0, max:100)
+            
+            ElevatedButton(onPressed: (){
+              var n1 = int.parse(_num1.value.text);
+              var n2 = int.parse(_num2.value.text);
+              var sum = n1 + n2;
+              setState(() {
+                numCounter = sum;
+              });
+              
+            }, child: const Text("Add")),
+           
           ],
         ),
       ),
