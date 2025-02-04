@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,23 +33,52 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double _counter = 0;
+  int _counter = 0;
   int numCounter = 0;
   var isChecked = false;
   final TextEditingController _num1 = TextEditingController();
-  final TextEditingController _num2 = TextEditingController();
+  // final TextEditingController _num2 = TextEditingController();
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    super.initState();
+    _loadCounter();
+    loadData();
+  }
+
+  /// Load the initial counter value from persistent storage on start,
+  /// or fallback to 0 if it doesn't exist.
+  Future<void> _loadCounter() async {
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _counter++;
+      _counter = prefs.getInt('counter') ?? 0;
     });
   }
 
-  void setNewValue(double val) {
+  void loadData() {
+    EncryptedSharedPreferences esp = EncryptedSharedPreferences();
+    esp.getString('mydata').then((String value) {
     setState(() {
-      _counter = val;
+      _num1.text = value;
+    }); /// Prints Hello, World!
+});
+  }
+
+  /// After a click, increment the counter state and
+  /// asynchronously save it to persistent storage.
+  Future<void> _incrementCounter() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _counter = (prefs.getInt('counter') ?? 0) + 1;
+      prefs.setInt('counter', _counter);
     });
   }
+
+  // void _incrementCounter() {
+  //   setState(() {
+  //     _counter++;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +88,25 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       appBar: AppBar(
         actions: [
-          OutlinedButton(onPressed: () {}, child: Text("Button 1")),
+          OutlinedButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                          title: Text("Button 1 Action"),
+                          content: Text("Button 1 was pressed!"),
+                          actions: [
+                            ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text("Ok")),
+                            ElevatedButton(
+                                onPressed: () {}, child: Text("Cancel"))
+                          ],
+                        ));
+              },
+              child: Text("Button 1")),
           OutlinedButton(onPressed: () {}, child: Text("Button 2"))
         ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -110,7 +159,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: TextStyle(fontSize: 30.0),
               )
             ],
-          )
+          ),
+          Text("You have pressed the button this number of times:"),
+          Text("$_counter"),
+          ElevatedButton(
+              onPressed: _incrementCounter, child: Text("Click me!")),
+          TextField(
+            controller: _num1,
+            decoration: InputDecoration(
+                hintText: "Enter a value to be remembered",
+                border: OutlineInputBorder()),
+          ),
+          ElevatedButton(
+              onPressed: () {
+                EncryptedSharedPreferences esp = EncryptedSharedPreferences();
+                esp.setString('mydata', _num1.value.text).then((bool success) {
+                  if (success) {
+                    print('success');
+                  } else {
+                    print('fail');
+                  }
+                });
+              },
+              child: Text("Save"))
         ]),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -120,9 +191,17 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
         onTap: (btnIndex) {
           if (btnIndex == 0) {
-            print("Camera button clicked");
+            const snackBar = SnackBar(
+              content: Text("Camera button clicked!"),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            // print("Camera button clicked");
           } else {
-            print("Phone button was clicked");
+            const snackBar = SnackBar(
+              content: Text("Phone button was clicked!"),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            // print("Phone button was clicked");
           }
         },
       ),
