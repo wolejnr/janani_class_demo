@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
+import 'package:w25_class_demos/data_repo.dart';
+import 'package:w25_class_demos/second_page.dart';
+import 'package:w25_class_demos/third_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,6 +23,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'My Special App'),
+      routes: {
+        '/second': (context) => SecondPage(),
+        '/third': (context) { return ThirdPage(); }
+      }
     );
   }
 }
@@ -90,24 +98,12 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           OutlinedButton(
               onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) => AlertDialog(
-                          title: Text("Button 1 Action"),
-                          content: Text("Button 1 was pressed!"),
-                          actions: [
-                            ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Text("Ok")),
-                            ElevatedButton(
-                                onPressed: () {}, child: Text("Cancel"))
-                          ],
-                        ));
+                Navigator.pushNamed(context, '/second');
               },
               child: Text("Button 1")),
-          OutlinedButton(onPressed: () {}, child: Text("Button 2"))
+          OutlinedButton(onPressed: () {
+            Navigator.pushNamed(context, '/third');
+          }, child: Text("Button 2"))
         ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
@@ -180,21 +176,25 @@ class _MyHomePageState extends State<MyHomePage> {
                     print('fail');
                   }
                 });
+
+                DataRepository.loginName = _num1.value.text;
+                Navigator.pushNamed(context, '/second');
               },
               child: Text("Save"))
         ]),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.camera), label: "Camera"),
+          BottomNavigationBarItem(icon: Icon(Icons.school), label: "Algonquin"),
           BottomNavigationBarItem(icon: Icon(Icons.add_call), label: "Phone")
         ],
         onTap: (btnIndex) {
           if (btnIndex == 0) {
             const snackBar = SnackBar(
-              content: Text("Camera button clicked!"),
+              content: Text("Algonquin College button clicked!"),
             );
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            launchUrl(Uri.parse("https://www.algonquincollege.com"));
             // print("Camera button clicked");
           } else {
             const snackBar = SnackBar(
