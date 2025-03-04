@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:w25_class_demos/data_repo.dart';
+import 'package:w25_class_demos/database.dart';
+import 'package:w25_class_demos/todo_dao.dart';
+import 'package:w25_class_demos/todo_item.dart';
 
 class SecondPage extends StatefulWidget {
   const SecondPage({super.key});
@@ -9,9 +12,26 @@ class SecondPage extends StatefulWidget {
 }
 
 class _SecondPageState extends State<SecondPage> {
-  var words = <String>["Item 1", "Item 2"];
+  var words = <TodoItem>[];
+
+  late TodoDao myDAO;
 
   final TextEditingController _input = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    $FloorAppDatabase.databaseBuilder("app_database.db").build().then((database){
+      myDAO = database.todoDao;
+      myDAO.getAllItems().then((listOfItems){
+        setState(() {
+          words.clear();
+          words.addAll(listOfItems);
+        });
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +56,9 @@ class _SecondPageState extends State<SecondPage> {
                     onPressed: () {
                       if (_input.value.text.isNotEmpty) {
                         setState(() {
-                          words.add(_input.value.text);
+                          var newItem = TodoItem(TodoItem.ID++, _input.value.text);
+                          myDAO.insertItem(newItem);
+                          words.add(newItem);
                           _input.text = "";
                         });
                       } else {
@@ -65,6 +87,7 @@ class _SecondPageState extends State<SecondPage> {
                                   ElevatedButton(
                                       onPressed: () {
                                         setState(() {
+                                          myDAO.deleteItem(words[rowNum]);
                                           words.removeAt(rowNum);
                                           Navigator.pop(context);
                                         });
@@ -82,7 +105,7 @@ class _SecondPageState extends State<SecondPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Text("Row Number: $rowNum"),
-                          Text(words[rowNum])
+                          Text(words[rowNum].todoItem)
                         ],
                       ),
                     );
