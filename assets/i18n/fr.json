@@ -1,0 +1,17 @@
+{
+    "app_bar": {
+        "title": "Mon application spéciale",
+        "button1": "Bouton 1",
+        "button2": "Bouton 2"
+    },
+    "drawer": {
+        "item0": "Voici la section des tiroirs !"
+    },
+    "bottomNav": {
+        "callBtn": "Appeler",
+        "route": "Itinéraire"
+    },
+    "secondPage": {
+        "title": "La deuxième page"
+    }
+}

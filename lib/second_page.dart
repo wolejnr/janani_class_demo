@@ -3,6 +3,7 @@ import 'package:w25_class_demos/data_repo.dart';
 import 'package:w25_class_demos/database.dart';
 import 'package:w25_class_demos/todo_dao.dart';
 import 'package:w25_class_demos/todo_item.dart';
+import 'package:flutter_translate/flutter_translate.dart';
 
 class SecondPage extends StatefulWidget {
   const SecondPage({super.key});
@@ -37,7 +38,7 @@ class _SecondPageState extends State<SecondPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Second Page"),
+        title: Text(translate('secondPage.title')),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Center(

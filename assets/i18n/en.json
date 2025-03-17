@@ -1,0 +1,17 @@
+{
+    "app_bar": {
+        "title": "My Special App",
+        "button1": "Button 1",
+        "button2": "Button 2"
+    },
+    "drawer": {
+        "item0": "This is the drawer section!"
+    },
+    "bottomNav": {
+        "callBtn": "Call",
+        "route": "Route"
+    },
+    "secondPage": {
+        "title": "The Second Page"
+    }
+}

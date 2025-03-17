@@ -5,9 +5,17 @@ import 'package:w25_class_demos/data_repo.dart';
 import 'package:w25_class_demos/second_page.dart';
 import 'package:w25_class_demos/third_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_translate/flutter_translate.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/cupertino.dart';
 
-void main() {
-  runApp(const MyApp());
+
+void main() async {
+  var delegate = await LocalizationDelegate.create(
+      fallbackLocale: 'en_CA',
+      supportedLocales: ['en_CA', 'fr']);
+
+  runApp(LocalizedApp(delegate, const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -15,18 +23,34 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+
+    var localizationDelegate = LocalizedApp.of(context).delegate;
+
+    return LocalizationProvider(
+      state: LocalizationProvider.of(context).state,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          localizationDelegate
+        ],
+        supportedLocales: localizationDelegate.supportedLocales,
+        locale: localizationDelegate.currentLocale,
+
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+
+        home: MyHomePage(title: translate('app_bar.title')),
+        routes: {
+          '/second': (context) => SecondPage(),
+          '/third': (context) { return ThirdPage(); }
+        }
       ),
-      home: const MyHomePage(title: 'My Special App'),
-      routes: {
-        '/second': (context) => SecondPage(),
-        '/third': (context) { return ThirdPage(); }
-      }
     );
   }
 }
@@ -92,18 +116,21 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(
-        child: Text("This is the drawer section!"),
+        child: Text(translate('drawer.item0')),
       ),
       appBar: AppBar(
         actions: [
+          ElevatedButton(onPressed: () {
+            _onActionSheetPress(context);
+          }, child: Text("Language")),
           OutlinedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/second');
               },
-              child: Text("Button 1")),
+              child: Text(translate('app_bar.button1'))),
           OutlinedButton(onPressed: () {
             Navigator.pushNamed(context, '/third');
-          }, child: Text("Button 2"))
+          }, child: Text(translate('app_bar.button2')))
         ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
@@ -117,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   const Icon(Icons.call),
                   Text(
-                    "Call".toUpperCase(),
+                    translate("bottomNav.callBtn"),
                     style: const TextStyle(color: Colors.red),
                   )
                 ],
@@ -129,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.teal,
                   ),
                   Text(
-                    "Route".toUpperCase(),
+                    translate('bottomNav.route'),
                     style: const TextStyle(color: Colors.red),
                   )
                 ],
@@ -207,4 +234,44 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  void showDemoActionSheet(
+      {required BuildContext context, required Widget child}) {
+    showCupertinoModalPopup<String>(
+        context: context,
+        builder: (BuildContext context) => child).then((String? value) {
+      if (value != null) changeLocale(context, value);
+    });
+  }
+
+  void _onActionSheetPress(BuildContext context) {
+    showDemoActionSheet(
+      context: context,
+      child: CupertinoActionSheet(
+        title: Text("Choose a language"),
+        message: Text("Language Options"),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            child: Text("English"),
+            onPressed: () => Navigator.pop(context, 'en_CA'),
+          ),
+          CupertinoActionSheetAction(
+            child: Text("French"),
+            onPressed: () => Navigator.pop(context, 'fr'),
+          ),
+          
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text("Cancel"),
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(context, null),
+        ),
+      ),
+    );
+  }
+
+
+
+
+
 }
